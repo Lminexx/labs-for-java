@@ -21,6 +21,10 @@ public class Habitat implements KeyListener {
     private ArraySing students;
     private Random random;
     private boolean simulationRunning =false;
+    private JButton buttonStart;
+    private JButton buttonStop;
+    private TextArea textArea;
+    private boolean flagForInfo = false;
 
     public Habitat(int width, int height) {
         this.width = width;
@@ -77,8 +81,8 @@ public class Habitat implements KeyListener {
         controlpanel.setPreferredSize(new Dimension(200,frame.getHeight()));
         controlpanel.setLayout(new FlowLayout());
         //Создание объектов для контрольной панельки.
-        JButton buttonStart = new JButton("Start");
-        JButton buttonStop = new JButton("Stop");
+        buttonStart = new JButton("Start");
+        buttonStop = new JButton("Stop");
         JCheckBox checkInfo = new JCheckBox("Show info");
         JRadioButton showTime = new JRadioButton("Showing time");
         JRadioButton hideTime = new JRadioButton("Hiding time");
@@ -93,6 +97,7 @@ public class Habitat implements KeyListener {
         JLabel textB = new JLabel("B - start simulation");
         JLabel textE = new JLabel("E - stop simulation");
         JLabel textT = new JLabel("T - time on/off");
+
 
         //В выборку добавляю значения шанса
         for (int i = 1; i <= 100; i++) {
@@ -128,6 +133,17 @@ public class Habitat implements KeyListener {
                 }
 
 
+            }
+        });
+
+        checkInfo.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if(e.getStateChange() == ItemEvent.SELECTED){
+                    flagForInfo = true;
+                }else{
+                    flagForInfo = false;
+                }
             }
         });
 
@@ -218,11 +234,15 @@ public class Habitat implements KeyListener {
         timer.stop();
         countStudentsText.setText("Количество студентов = " + cntMale);
         countFemaleStudents.setText("Количество студенток = " + cntFemale);
-        time = 0;
         countLabelMale = true;
         countLabelFemale = true;
         countStudentsText.setVisible(countLabelMale);
         countFemaleStudents.setVisible(countLabelFemale);
+        if(flagForInfo){
+            JOptionPane.showMessageDialog(frame, "Количество студентов = " + cntMale + "\n" + "Количество студенток = " + cntFemale + "\n" + "Время выполнения: " + time/1000 + " секунд", "Информация", JOptionPane.INFORMATION_MESSAGE);
+        }
+        time = 0;
+
     }
     private void update() {
         double maleProbability = 0.6;
@@ -241,16 +261,23 @@ public class Habitat implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(e.getKeyCode() == KeyEvent.VK_B){
-            System.out.println("нажал");
-            startSimulation();
+        if(!simulationRunning){
+            if(e.getKeyCode() == KeyEvent.VK_B){
+                startSimulation();
+                buttonStart.setBackground(Color.GRAY);
+                buttonStop.setBackground(Color.BLACK);
+                simulationRunning = !simulationRunning;
+            }
         }
-        if(e.getKeyCode() == KeyEvent.VK_E){
-            System.out.println("нажал");
-            stopSimulation();
+        if(simulationRunning){
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                stopSimulation();
+                buttonStart.setBackground(Color.BLACK);
+                buttonStop.setBackground(Color.GRAY);
+                simulationRunning = !simulationRunning;
+            }
         }
         if(e.getKeyCode() == KeyEvent.VK_T){
-            System.out.println("нажал");
             timeLabel = !timeLabel;
             label.setVisible(timeLabel);
         }
