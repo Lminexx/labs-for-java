@@ -11,3 +11,4 @@ public abstract class Student implements IBehaviour {
     protected abstract void draw(Graphics g);
 }
 
+

@@ -20,14 +20,14 @@ public class Habitat implements KeyListener {
     private boolean timeLabel = true;
     private boolean countLabelMale = false;
     private boolean countLabelFemale = false;
-    private ArrayList<Student> students;
+    private ArraySing students;
     private Random random;
 
     public Habitat(int width, int height) {
         this.width = width;
         this.height = height;
-        random = new Random();
-        students = new ArrayList<>();
+        this.random = new Random();
+        this.students = ArraySing.getInstance();
         initialize();
     }
     private void initialize() {
@@ -103,10 +103,10 @@ public class Habitat implements KeyListener {
         double maleProbability = 0.6;
         double femaleProbability = 0.4;
         if (Math.random() < maleProbability) {
-            students.add(new MaleStudent(random.nextInt(width), random.nextInt(height)));
+            students.addObj(new MaleStudent(random.nextInt(width), random.nextInt(height)));
         }
         if (Math.random() < femaleProbability) {
-            students.add(new FemaleStudent(random.nextInt(width), random.nextInt(height)));
+            students.addObj(new FemaleStudent(random.nextInt(width), random.nextInt(height)));
         }
     }
 
