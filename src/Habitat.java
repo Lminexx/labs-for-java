@@ -78,25 +78,82 @@ public class Habitat implements KeyListener {
         //Создание объектов для контрольной панельки.
         JButton buttonStart = new JButton("Start");
         JButton buttonStop = new JButton("Stop");
+        JCheckBox checkInfo = new JCheckBox("Show info");
+        JRadioButton showTime = new JRadioButton("Showing time");
+        JRadioButton hideTime = new JRadioButton("Hiding time");
+        JLabel textForFirst = new JLabel("Шанс появления первого:");
+        JComboBox<Integer> firstVib = new JComboBox<>();
+        JLabel periodForFirst = new JLabel("Периодичность первого(сек):");
+        JTextField inputTextFirst = new JFormattedTextField("1");
+        JLabel textForSecond = new JLabel("Шанс появления второго:");
+        JComboBox<Integer> secondVib = new JComboBox<>();
+        JLabel periodForSecond = new JLabel("Периодичность второго(сек):");
+        JTextField inputTextSecond = new JFormattedTextField("1");
+        JLabel textB = new JLabel("B - start simulation");
+        JLabel textE = new JLabel("E - stop simulation");
+        JLabel textT = new JLabel("T - time on/off");
 
+        //В выборку добавляю значения шанса
+        for (int i = 1; i <= 100; i++) {
+            firstVib.addItem(i);
+            secondVib.addItem(i);
+        }
+
+
+        //Установил пустой цвет клика. Так симпатичнее имхо.
         buttonStart.setUI(new CustomButtonUI());
         buttonStop.setUI(new CustomButtonUI());
-
+        //Убрал фокус с кнопок, а то не работали нажатия с клавы из-за этого.
         buttonStart.setFocusable(false);
         buttonStop.setFocusable(false);
-
-        //Установка размеров и т.д.
+        checkInfo.setFocusable(false);
+        showTime.setFocusable(false);
+        hideTime.setFocusable(false);
+        firstVib.setFocusable(false);
+        inputTextFirst.setFocusable(false);
+        secondVib.setFocusable(false);
+        //Установка размеров
         buttonStart.setPreferredSize(new Dimension(200,50));
         buttonStop.setPreferredSize(new Dimension(200,50));
-
+        checkInfo.setPreferredSize(new Dimension(130,20));
+        showTime.setPreferredSize(new Dimension(130,20));
+        hideTime.setPreferredSize(new Dimension(130,20));
+        firstVib.setPreferredSize(new Dimension(190,40));
+        inputTextFirst.setPreferredSize(new Dimension(190,40));
+        secondVib.setPreferredSize(new Dimension(190,40));
+        inputTextSecond.setPreferredSize(new Dimension(190,40));
+        //Установил задний фон и цвет текста. Получилось красиво :).
         buttonStart.setBackground(Color.BLACK);
         buttonStop.setBackground(Color.BLACK);
-
         buttonStart.setForeground(Color.CYAN);
         buttonStop.setForeground(Color.CYAN);
+        textForFirst.setFont(new Font("Arial", Font.PLAIN, 17));
+        periodForFirst.setFont(new Font("Arial",Font.PLAIN,15));
+        inputTextFirst.setFont(new Font("Arial", Font.BOLD,15));
+        textForSecond.setFont(new Font("Arial",Font.PLAIN,17));
+        periodForSecond.setFont(new Font("Arial", Font.PLAIN,15));
+        inputTextSecond.setFont(new Font("Arial", Font.BOLD,15));
+        textB.setFont(new Font("Arial",Font.BOLD, 14));
+        textE.setFont(new Font("Arial",Font.BOLD, 14));
+        textT.setFont(new Font("Arial",Font.BOLD, 14));
+
 
         controlpanel.add(buttonStart);
         controlpanel.add(buttonStop);
+        controlpanel.add(checkInfo);
+        controlpanel.add(showTime);
+        controlpanel.add(hideTime);
+        controlpanel.add(textForFirst);
+        controlpanel.add(firstVib);
+        controlpanel.add(periodForFirst);
+        controlpanel.add(inputTextFirst);
+        controlpanel.add(textForSecond);
+        controlpanel.add(secondVib);
+        controlpanel.add(periodForSecond);
+        controlpanel.add(inputTextSecond);
+        controlpanel.add(textB);
+        controlpanel.add(textE);
+        controlpanel.add(textT);
         frame.add(controlpanel, BorderLayout.EAST);
     }
 
