@@ -1,9 +1,7 @@
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Random;
 public class Habitat implements KeyListener {
@@ -35,6 +33,8 @@ public class Habitat implements KeyListener {
         frame.setTitle("laba first");
         frame.setSize(width, height);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setFocusable(true);
+        frame.requestFocusInWindow();
         panel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -56,10 +56,50 @@ public class Habitat implements KeyListener {
         panel.add(label);
         panel.add(countStudentsText);
         panel.add(countFemaleStudents);
-        frame.add(panel);
+        frame.add(panel, BorderLayout.CENTER);
+        panel.requestFocusInWindow();
+        controlPanel();
         frame.setVisible(true);
         frame.addKeyListener(this);
+
     }
+
+    public void controlPanel(){
+        JPanel controlpanel = new JPanel(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(Color.LIGHT_GRAY);
+                g.fillRect(0,0, getWidth(), getHeight());
+            }
+        };
+        controlpanel.setPreferredSize(new Dimension(200,frame.getHeight()));
+        controlpanel.setLayout(new FlowLayout());
+        //Создание объектов для контрольной панельки.
+        JButton buttonStart = new JButton("Start");
+        JButton buttonStop = new JButton("Stop");
+
+        buttonStart.setUI(new CustomButtonUI());
+        buttonStop.setUI(new CustomButtonUI());
+
+        buttonStart.setFocusable(false);
+        buttonStop.setFocusable(false);
+
+        //Установка размеров и т.д.
+        buttonStart.setPreferredSize(new Dimension(200,50));
+        buttonStop.setPreferredSize(new Dimension(200,50));
+
+        buttonStart.setBackground(Color.BLACK);
+        buttonStop.setBackground(Color.BLACK);
+
+        buttonStart.setForeground(Color.CYAN);
+        buttonStop.setForeground(Color.CYAN);
+
+        controlpanel.add(buttonStart);
+        controlpanel.add(buttonStop);
+        frame.add(controlpanel, BorderLayout.EAST);
+    }
+
     public void startSimulation() {
         students.clear();
         timer = new Timer(UPDATE_INTERVAL, new ActionListener() {
@@ -117,12 +157,15 @@ public class Habitat implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         if(e.getKeyCode() == KeyEvent.VK_B){
+            System.out.println("нажал");
             startSimulation();
         }
         if(e.getKeyCode() == KeyEvent.VK_E){
+            System.out.println("нажал");
             stopSimulation();
         }
         if(e.getKeyCode() == KeyEvent.VK_T){
+            System.out.println("нажал");
             timeLabel = !timeLabel;
             label.setVisible(timeLabel);
         }
