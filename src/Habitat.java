@@ -23,8 +23,11 @@ public class Habitat implements KeyListener {
     private boolean simulationRunning =false;
     private JButton buttonStart;
     private JButton buttonStop;
-    private TextArea textArea;
     private boolean flagForInfo = false;
+    private JRadioButton showTime;
+    private JRadioButton hideTime;
+    private double maleProbability = 0.6;
+    private double femaleProbability = 0.4;
 
     public Habitat(int width, int height) {
         this.width = width;
@@ -84,8 +87,9 @@ public class Habitat implements KeyListener {
         buttonStart = new JButton("Start");
         buttonStop = new JButton("Stop");
         JCheckBox checkInfo = new JCheckBox("Show info");
-        JRadioButton showTime = new JRadioButton("Showing time");
-        JRadioButton hideTime = new JRadioButton("Hiding time");
+        showTime = new JRadioButton("Showing time");
+        hideTime = new JRadioButton("Hiding time");
+        ButtonGroup groupRadio = new ButtonGroup();
         JLabel textForFirst = new JLabel("Шанс появления первого:");
         JComboBox<Integer> firstVib = new JComboBox<>();
         JLabel periodForFirst = new JLabel("Периодичность первого(сек):");
@@ -100,10 +104,16 @@ public class Habitat implements KeyListener {
 
 
         //В выборку добавляю значения шанса
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 10; i <= 100; i+=10) {
             firstVib.addItem(i);
             secondVib.addItem(i);
         }
+        firstVib.setSelectedIndex(5);
+        secondVib.setSelectedIndex(3);
+        groupRadio.add(showTime);
+        groupRadio.add(hideTime);
+
+        showTime.setSelected(true);
 
 
         //Установил пустой цвет клика. Так симпатичнее имхо.
@@ -144,6 +154,41 @@ public class Habitat implements KeyListener {
                 }else{
                     flagForInfo = false;
                 }
+            }
+        });
+
+        showTime.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if(e.getStateChange() == ItemEvent.SELECTED){
+                    timeLabel = true;
+                    label.setVisible(timeLabel);
+                }
+            }
+        });
+
+        hideTime.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if(e.getStateChange() == ItemEvent.SELECTED){
+                    timeLabel = false;
+                    label.setVisible(timeLabel);
+                }
+            }
+        });
+
+        firstVib.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selected = (int) firstVib.getSelectedItem();
+                maleProbability = selected/100.0;
+            }
+        });
+        secondVib.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selected = (int) secondVib.getSelectedItem();
+                femaleProbability = selected/100.0;
             }
         });
 
@@ -245,8 +290,6 @@ public class Habitat implements KeyListener {
 
     }
     private void update() {
-        double maleProbability = 0.6;
-        double femaleProbability = 0.4;
         if (Math.random() < maleProbability) {
             students.addObj(new MaleStudent(random.nextInt(width), random.nextInt(height)));
         }
@@ -280,6 +323,11 @@ public class Habitat implements KeyListener {
         if(e.getKeyCode() == KeyEvent.VK_T){
             timeLabel = !timeLabel;
             label.setVisible(timeLabel);
+            if (showTime.isSelected()) {
+                hideTime.setSelected(true);
+            } else if (hideTime.isSelected()) {
+                showTime.setSelected(true);
+            }
         }
     }
 
