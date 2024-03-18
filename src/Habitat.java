@@ -4,12 +4,17 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Random;
-public class Habitat implements KeyListener {
+public class Habitat{
     private int width;
     private int height;
     private final int UPDATE_INTERVAL = 1000;
+
+    private int update_male = 1000;
+    private int update_female= 1000;
     private int time;
     private Timer timer;
+    private Timer timerMale;
+    private Timer timerFemale;
     private JFrame frame;
     private JPanel panel;
     private JLabel label;
@@ -67,9 +72,8 @@ public class Habitat implements KeyListener {
         frame.add(panel, BorderLayout.CENTER);
         panel.requestFocusInWindow();
         controlPanel();
+        keyBoardClick();
         frame.setVisible(true);
-        frame.addKeyListener(this);
-
     }
 
     public void controlPanel(){
@@ -141,8 +145,6 @@ public class Habitat implements KeyListener {
                     buttonStop.setBackground(Color.GRAY);
                     simulationRunning = !simulationRunning;
                 }
-
-
             }
         });
 
@@ -192,6 +194,44 @@ public class Habitat implements KeyListener {
             }
         });
 
+        inputTextFirst.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int newValue = Integer.parseInt(inputTextFirst.getText());
+                    if (newValue >= 0) {
+                        timerMale.setDelay(newValue * 1000);
+                        panel.requestFocusInWindow();
+                        panel.setFocusable(true);
+                        frame.setFocusable(true);
+                    } else {
+                        JOptionPane.showMessageDialog(frame, "Введите положительное значение", "Ошибка", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(frame, "Введите допустимое число", "Ошибка", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        inputTextSecond.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int newValue = Integer.parseInt(inputTextSecond.getText());
+                    if (newValue >= 0) {
+                        timerFemale.setDelay(newValue * 1000);
+                        panel.requestFocusInWindow();
+                        panel.setFocusable(true);
+                        frame.setFocusable(true);
+                    } else {
+                        JOptionPane.showMessageDialog(frame, "Введите положительное значение", "Ошибка", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(frame, "Введите допустимое число", "Ошибка", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
         //Убрал фокус с кнопок, а то не работали нажатия с клавы из-за этого.
         buttonStart.setFocusable(false);
         buttonStop.setFocusable(false);
@@ -199,7 +239,6 @@ public class Habitat implements KeyListener {
         showTime.setFocusable(false);
         hideTime.setFocusable(false);
         firstVib.setFocusable(false);
-        inputTextFirst.setFocusable(false);
         secondVib.setFocusable(false);
         //Установка размеров
         buttonStart.setPreferredSize(new Dimension(200,50));
@@ -248,17 +287,31 @@ public class Habitat implements KeyListener {
 
     public void startSimulation() {
         students.clear();
-        timer = new Timer(UPDATE_INTERVAL, new ActionListener() {
+        timer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                update();
-                panel.repaint();
                 time+=UPDATE_INTERVAL;
                 label.setText(String.format("Time %d seconds",time/1000));
                 System.out.println(time/1000 + " seconds");
             }
         });
+        timerMale = new Timer(update_male, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateMale();
+                panel.repaint();
+            }
+        });
+        timerFemale = new Timer(update_female, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateFemale();
+                panel.repaint();
+            }
+        });
         timer.start();
+        timerMale.start();
+        timerFemale.start();
         countLabelMale = false;
         countLabelFemale = false;
         countStudentsText.setVisible(countLabelMale);
@@ -277,6 +330,8 @@ public class Habitat implements KeyListener {
         }
         frame.repaint();
         timer.stop();
+        timerMale.stop();
+        timerFemale.stop();
         countStudentsText.setText("Количество студентов = " + cntMale);
         countFemaleStudents.setText("Количество студенток = " + cntFemale);
         countLabelMale = true;
@@ -289,50 +344,51 @@ public class Habitat implements KeyListener {
         time = 0;
 
     }
-    private void update() {
+    private void updateMale(){
         if (Math.random() < maleProbability) {
             students.addObj(new MaleStudent(random.nextInt(width), random.nextInt(height)));
         }
+    }
+    private void updateFemale(){
         if (Math.random() < femaleProbability) {
             students.addObj(new FemaleStudent(random.nextInt(width), random.nextInt(height)));
         }
     }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
+    
+    private void keyBoardClick(){
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+            @Override
+            public boolean dispatchKeyEvent(KeyEvent e) {
+                if (e.getID() == KeyEvent.KEY_PRESSED) {
+                    if (!simulationRunning) {
+                        if (e.getKeyCode() == KeyEvent.VK_B) {
+                            startSimulation();
+                            buttonStart.setBackground(Color.GRAY);
+                            buttonStop.setBackground(Color.BLACK);
+                            simulationRunning = true;
+                        }
+                    } else {
+                        if (e.getKeyCode() == KeyEvent.VK_E) {
+                            stopSimulation();
+                            buttonStart.setBackground(Color.BLACK);
+                            buttonStop.setBackground(Color.GRAY);
+                            simulationRunning = false;
+                        }
+                    }
+                    if (e.getKeyCode() == KeyEvent.VK_T) {
+                        timeLabel = !timeLabel;
+                        label.setVisible(timeLabel);
+                        if (showTime.isSelected()) {
+                            hideTime.setSelected(true);
+                        } else if (hideTime.isSelected()) {
+                            showTime.setSelected(true);
+                        }
+                    }
+                }
+                return false;
+            }
+        });
     }
 
-    @Override
-    public void keyPressed(KeyEvent e) {
-        if(!simulationRunning){
-            if(e.getKeyCode() == KeyEvent.VK_B){
-                startSimulation();
-                buttonStart.setBackground(Color.GRAY);
-                buttonStop.setBackground(Color.BLACK);
-                simulationRunning = !simulationRunning;
-            }
-        }
-        if(simulationRunning){
-            if(e.getKeyCode() == KeyEvent.VK_E){
-                stopSimulation();
-                buttonStart.setBackground(Color.BLACK);
-                buttonStop.setBackground(Color.GRAY);
-                simulationRunning = !simulationRunning;
-            }
-        }
-        if(e.getKeyCode() == KeyEvent.VK_T){
-            timeLabel = !timeLabel;
-            label.setVisible(timeLabel);
-            if (showTime.isSelected()) {
-                hideTime.setSelected(true);
-            } else if (hideTime.isSelected()) {
-                showTime.setSelected(true);
-            }
-        }
-    }
 
-    @Override
-    public void keyReleased(KeyEvent e) {
-
-    }
 }
