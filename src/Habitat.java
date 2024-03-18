@@ -20,6 +20,7 @@ public class Habitat implements KeyListener {
     private boolean countLabelFemale = false;
     private ArraySing students;
     private Random random;
+    private boolean simulationRunning =false;
 
     public Habitat(int width, int height) {
         this.width = width;
@@ -103,6 +104,33 @@ public class Habitat implements KeyListener {
         //Установил пустой цвет клика. Так симпатичнее имхо.
         buttonStart.setUI(new CustomButtonUI());
         buttonStop.setUI(new CustomButtonUI());
+        //Нажатие кнопок, что делают и т.д.
+        buttonStart.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!simulationRunning){
+                    startSimulation();
+                    buttonStart.setBackground(Color.GRAY);
+                    buttonStop.setBackground(Color.BLACK);
+                    simulationRunning = !simulationRunning;
+                }
+            }
+        });
+
+        buttonStop.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(simulationRunning){
+                    stopSimulation();
+                    buttonStart.setBackground(Color.BLACK);
+                    buttonStop.setBackground(Color.GRAY);
+                    simulationRunning = !simulationRunning;
+                }
+
+
+            }
+        });
+
         //Убрал фокус с кнопок, а то не работали нажатия с клавы из-за этого.
         buttonStart.setFocusable(false);
         buttonStop.setFocusable(false);
