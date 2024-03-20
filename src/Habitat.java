@@ -117,10 +117,12 @@ public class Habitat{
         groupRadio.add(showTime);
         groupRadio.add(hideTime);
         showTime.setSelected(true);
+        simulation.addItem("Simulation");
         simulation.addItem("Start");
         simulation.addItem("Stop");
         simulation.addItem("Show info");
         simulation.addItem("Exit");
+        timerSim.addItem("Timer");
         timerSim.addItem("Show Time");
         timerSim.addItem("Hide Time");
 
@@ -196,6 +198,52 @@ public class Habitat{
             public void actionPerformed(ActionEvent e) {
                 int selected = (int) secondVib.getSelectedItem();
                 femaleProbability = selected/100.0;
+            }
+        });
+
+        simulation.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String selected = (String) simulation.getSelectedItem();
+                if(selected.equals("Start")){
+                    if(!simulationRunning){
+                        startSimulation();
+                        buttonStart.setBackground(Color.GRAY);
+                        buttonStop.setBackground(Color.BLACK);
+                        simulationRunning = !simulationRunning;
+                    }
+                }
+                if(selected.equals("Stop")){
+                    if(simulationRunning){
+                        stopSimulation();
+                        buttonStart.setBackground(Color.BLACK);
+                        buttonStop.setBackground(Color.GRAY);
+                        simulationRunning = !simulationRunning;
+                    }
+                }
+                if(selected.equals("Show info")){
+                    flagForInfo = true;
+                    checkInfo.setSelected(true);
+                }
+                if(selected.equals("Exit")){
+                    System.exit(0);
+                }
+            }
+        });
+        timerSim.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String selected = (String) timerSim.getSelectedItem();
+                if(selected.equals("Show Time")){
+                    timeLabel = true;
+                    label.setVisible(true);
+                    showTime.setSelected(true);
+                }
+                if(selected.equals("Hide Time")){
+                    timeLabel = false;
+                    label.setVisible(false);
+                    hideTime.setSelected(true);
+                }
             }
         });
 
