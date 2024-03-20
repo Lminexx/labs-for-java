@@ -1,8 +1,6 @@
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
 import java.util.Random;
 public class Habitat{
     private int width;
@@ -43,7 +41,7 @@ public class Habitat{
     }
     private void initialize() {
         frame = new JFrame();
-        frame.setTitle("laba first");
+        frame.setTitle("laboratornaya");
         frame.setSize(width, height);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setFocusable(true);
@@ -105,6 +103,8 @@ public class Habitat{
         JLabel textB = new JLabel("B - start simulation");
         JLabel textE = new JLabel("E - stop simulation");
         JLabel textT = new JLabel("T - time on/off");
+        JComboBox<String> simulation = new JComboBox<>();
+        JComboBox<String> timerSim = new JComboBox<>();
 
 
         //В выборку добавляю значения шанса
@@ -116,8 +116,13 @@ public class Habitat{
         secondVib.setSelectedIndex(3);
         groupRadio.add(showTime);
         groupRadio.add(hideTime);
-
         showTime.setSelected(true);
+        simulation.addItem("Start");
+        simulation.addItem("Stop");
+        simulation.addItem("Show info");
+        simulation.addItem("Exit");
+        timerSim.addItem("Show Time");
+        timerSim.addItem("Hide Time");
 
 
         //Установил пустой цвет клика. Так симпатичнее имхо.
@@ -240,6 +245,8 @@ public class Habitat{
         hideTime.setFocusable(false);
         firstVib.setFocusable(false);
         secondVib.setFocusable(false);
+        simulation.setFocusable(false);
+        timerSim.setFocusable(false);
         //Установка размеров
         buttonStart.setPreferredSize(new Dimension(200,50));
         buttonStop.setPreferredSize(new Dimension(200,50));
@@ -250,6 +257,8 @@ public class Habitat{
         inputTextFirst.setPreferredSize(new Dimension(190,40));
         secondVib.setPreferredSize(new Dimension(190,40));
         inputTextSecond.setPreferredSize(new Dimension(190,40));
+        simulation.setPreferredSize(new Dimension(190,40));
+        timerSim.setPreferredSize(new Dimension(190,40));
         //Установил задний фон и цвет текста. Получилось красиво :).
         buttonStart.setBackground(Color.BLACK);
         buttonStop.setBackground(Color.BLACK);
@@ -282,6 +291,8 @@ public class Habitat{
         controlpanel.add(textB);
         controlpanel.add(textE);
         controlpanel.add(textT);
+        controlpanel.add(simulation);
+        controlpanel.add(timerSim);
         frame.add(controlpanel, BorderLayout.EAST);
     }
 
@@ -340,6 +351,7 @@ public class Habitat{
         countFemaleStudents.setVisible(countLabelFemale);
         if(flagForInfo){
             JOptionPane.showMessageDialog(frame, "Количество студентов = " + cntMale + "\n" + "Количество студенток = " + cntFemale + "\n" + "Время выполнения: " + time/1000 + " секунд", "Информация", JOptionPane.INFORMATION_MESSAGE);
+
         }
         time = 0;
 
@@ -354,7 +366,7 @@ public class Habitat{
             students.addObj(new FemaleStudent(random.nextInt(width), random.nextInt(height)));
         }
     }
-    
+
     private void keyBoardClick(){
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
             @Override
