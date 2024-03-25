@@ -14,4 +14,11 @@ public class MaleStudent extends Student {
     public void move() {
 
     }
+    @Override
+    public String toString() {
+        return "MaleStudent{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
+    }
 }

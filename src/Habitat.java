@@ -24,6 +24,7 @@ public class Habitat{
     private boolean simulationRunning = false;
     private JButton buttonStart;
     private JButton buttonStop;
+    private JButton buttonShowLife;
     private boolean flagForInfo = false;
     private JRadioButton showTime;
     private JRadioButton hideTime;
@@ -176,13 +177,14 @@ public class Habitat{
         JComboBox<Integer> secondVib = new JComboBox<>();
         JLabel periodForSecond = new JLabel("Периодичность второго(сек):");
         JTextField inputTextSecond = new JFormattedTextField("1");
-        JLabel textB = new JLabel("B - start simulation");
-        JLabel textE = new JLabel("E - stop simulation");
-        JLabel textT = new JLabel("T - time on/off");
         JLabel timeToDieTextForFirst = new JLabel("Время жизни для первого:");
         JTextField inputTimeDieForFirst = new JFormattedTextField("7");
         JLabel timeToDieTextForSecond = new JLabel("Время жизни для второго:");
         JTextField inputTimeDieForSecond = new JFormattedTextField("10");
+        buttonShowLife = new JButton("Show life's users");
+        JLabel textB = new JLabel("B - start simulation");
+        JLabel textE = new JLabel("E - stop simulation");
+        JLabel textT = new JLabel("T - time on/off");
 
         //В выборку добавляю значения шанса
         for (int i = 10; i <= 100; i+=10) {
@@ -198,6 +200,7 @@ public class Habitat{
         //Установил пустой цвет клика. Так симпатичнее имхо.
         buttonStart.setUI(new CustomButtonUI());
         buttonStop.setUI(new CustomButtonUI());
+        buttonShowLife.setUI(new CustomButtonUI());
         //Нажатие кнопок, что делают и т.д.
         buttonStart.addActionListener(e -> {
             if(!simulationRunning){
@@ -313,6 +316,19 @@ public class Habitat{
             }
         });
 
+        buttonShowLife.addActionListener(e -> {
+            StringBuilder sb  = new StringBuilder();
+            for (Double key : students.getTimeToBornTree().keySet()){
+                sb.append(key + " " + students.getTimeToBornTree().get(key) + "\n");
+            }
+            String message = sb.toString();
+            JOptionPane.showOptionDialog(frame, message, "Живые студенты:",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE,
+                    null, new String[]{"Ок", "Отмена"}, "Ок");
+
+        });
+
         //Убрал фокус с кнопок, а то не работали нажатия с клавы из-за этого.
         buttonStart.setFocusable(false);
         buttonStop.setFocusable(false);
@@ -321,6 +337,7 @@ public class Habitat{
         hideTime.setFocusable(false);
         firstVib.setFocusable(false);
         secondVib.setFocusable(false);
+        buttonShowLife.setFocusable(false);
         //Установка размеров
         buttonStart.setPreferredSize(new Dimension(200,50));
         buttonStop.setPreferredSize(new Dimension(200,50));
@@ -333,11 +350,15 @@ public class Habitat{
         inputTextSecond.setPreferredSize(new Dimension(190,40));
         inputTimeDieForFirst.setPreferredSize(new Dimension(190,40));
         inputTimeDieForSecond.setPreferredSize(new Dimension(190,40));
+        buttonShowLife.setPreferredSize(new Dimension(200,50));
         //Установил задний фон и цвет текста. Получилось красиво :).
         buttonStart.setBackground(Color.BLACK);
         buttonStop.setBackground(Color.BLACK);
+        buttonShowLife.setBackground(Color.BLACK);
         buttonStart.setForeground(Color.CYAN);
         buttonStop.setForeground(Color.CYAN);
+        buttonShowLife.setForeground(Color.CYAN);
+
         textForFirst.setFont(new Font("Arial", Font.PLAIN, 17));
         periodForFirst.setFont(new Font("Arial",Font.PLAIN,15));
         inputTextFirst.setFont(new Font("Arial", Font.BOLD,15));
@@ -364,19 +385,24 @@ public class Habitat{
         controlpanel.add(secondVib);
         controlpanel.add(periodForSecond);
         controlpanel.add(inputTextSecond);
-        controlpanel.add(textB);
-        controlpanel.add(textE);
-        controlpanel.add(textT);
         controlpanel.add(timeToDieTextForFirst);
         controlpanel.add(inputTimeDieForFirst);
         controlpanel.add(timeToDieTextForSecond);
         controlpanel.add(inputTimeDieForSecond);
+        controlpanel.add(buttonShowLife);
+        controlpanel.add(textB);
+        controlpanel.add(textE);
+        controlpanel.add(textT);
         frame.add(controlpanel, BorderLayout.EAST);
     }
 
-
     public void startSimulation() {
         students.clear();
+        startTimers();
+        countStudentsText.setVisible(false);
+        countFemaleStudents.setVisible(false);
+    }
+    public void startTimers(){
         timer = new Timer(1000, e -> {
             time+=UPDATE_INTERVAL;
             label.setText(String.format("Time %d seconds",time/1000));
@@ -388,7 +414,6 @@ public class Habitat{
                 if((((double) time / 1000) - studentBorn) >= studentLife.timeToDie){
                     iteratorStudent.remove();
                     students.clearObject(studentLife);
-                    System.out.println(students.getTimeToBornTree());
                 }
             }
 
@@ -405,9 +430,8 @@ public class Habitat{
         timer.start();
         timerMale.start();
         timerFemale.start();
-        countStudentsText.setVisible(false);
-        countFemaleStudents.setVisible(false);
     }
+
     public void stopSimulation() {
         int cntMale = 0;
         int cntFemale = 0;

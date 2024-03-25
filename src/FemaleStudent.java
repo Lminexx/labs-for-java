@@ -20,4 +20,11 @@ public class FemaleStudent extends Student {
     public int hashCode() {
         return super.hashCode();
     }
+    @Override
+    public String toString() {
+        return "FemaleStudent{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
+    }
 }
