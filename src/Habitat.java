@@ -1,7 +1,9 @@
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Random;
+import java.util.*;
+
 public class Habitat{
     private int width;
     private int height;
@@ -17,7 +19,6 @@ public class Habitat{
     private JLabel countStudentsText;
     private JLabel countFemaleStudents;
     private boolean timeLabel = true;
-
     private final ArraySing students;
     private Random random;
     private boolean simulationRunning = false;
@@ -29,6 +30,9 @@ public class Habitat{
     private double maleProbability = 0.6;
     private double femaleProbability = 0.4;
     private JCheckBox checkInfo;
+
+    private int setTimeToDieFirst = 7;
+    private int setTimeToDieSecond = 10;
 
     public Habitat(int width, int height) {
         this.width = width;
@@ -175,7 +179,10 @@ public class Habitat{
         JLabel textB = new JLabel("B - start simulation");
         JLabel textE = new JLabel("E - stop simulation");
         JLabel textT = new JLabel("T - time on/off");
-
+        JLabel timeToDieTextForFirst = new JLabel("Время жизни для первого:");
+        JTextField inputTimeDieForFirst = new JFormattedTextField("7");
+        JLabel timeToDieTextForSecond = new JLabel("Время жизни для второго:");
+        JTextField inputTimeDieForSecond = new JFormattedTextField("10");
 
         //В выборку добавляю значения шанса
         for (int i = 10; i <= 100; i+=10) {
@@ -187,7 +194,6 @@ public class Habitat{
         groupRadio.add(showTime);
         groupRadio.add(hideTime);
         showTime.setSelected(true);
-
 
         //Установил пустой цвет клика. Так симпатичнее имхо.
         buttonStart.setUI(new CustomButtonUI());
@@ -275,6 +281,38 @@ public class Habitat{
             }
         });
 
+        inputTimeDieForFirst.addActionListener(e -> {
+            try {
+                int newValue = Integer.parseInt(inputTimeDieForFirst.getText());
+                if (newValue >= 0) {
+                    setTimeToDieFirst = newValue;
+                    panel.requestFocusInWindow();
+                    panel.setFocusable(true);
+                    frame.setFocusable(true);
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Введите положительное значение", "Ошибка", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(frame, "Введите допустимое число", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        inputTimeDieForSecond.addActionListener(e -> {
+            try {
+                int newValue = Integer.parseInt(inputTimeDieForSecond.getText());
+                if (newValue >= 0) {
+                    setTimeToDieSecond = newValue;
+                    panel.requestFocusInWindow();
+                    panel.setFocusable(true);
+                    frame.setFocusable(true);
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Введите положительное значение", "Ошибка", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(frame, "Введите допустимое число", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         //Убрал фокус с кнопок, а то не работали нажатия с клавы из-за этого.
         buttonStart.setFocusable(false);
         buttonStop.setFocusable(false);
@@ -293,6 +331,8 @@ public class Habitat{
         inputTextFirst.setPreferredSize(new Dimension(190,40));
         secondVib.setPreferredSize(new Dimension(190,40));
         inputTextSecond.setPreferredSize(new Dimension(190,40));
+        inputTimeDieForFirst.setPreferredSize(new Dimension(190,40));
+        inputTimeDieForSecond.setPreferredSize(new Dimension(190,40));
         //Установил задний фон и цвет текста. Получилось красиво :).
         buttonStart.setBackground(Color.BLACK);
         buttonStop.setBackground(Color.BLACK);
@@ -307,7 +347,8 @@ public class Habitat{
         textB.setFont(new Font("Arial",Font.BOLD, 14));
         textE.setFont(new Font("Arial",Font.BOLD, 14));
         textT.setFont(new Font("Arial",Font.BOLD, 14));
-
+        timeToDieTextForFirst.setFont(new Font("Arial",Font.BOLD,15));
+        timeToDieTextForSecond.setFont(new Font("Arial",Font.BOLD, 15));
 
 
         controlpanel.add(buttonStart);
@@ -326,6 +367,10 @@ public class Habitat{
         controlpanel.add(textB);
         controlpanel.add(textE);
         controlpanel.add(textT);
+        controlpanel.add(timeToDieTextForFirst);
+        controlpanel.add(inputTimeDieForFirst);
+        controlpanel.add(timeToDieTextForSecond);
+        controlpanel.add(inputTimeDieForSecond);
         frame.add(controlpanel, BorderLayout.EAST);
     }
 
@@ -335,7 +380,18 @@ public class Habitat{
         timer = new Timer(1000, e -> {
             time+=UPDATE_INTERVAL;
             label.setText(String.format("Time %d seconds",time/1000));
-            System.out.println(time/1000 + " seconds");
+            Iterator<Map.Entry<Double, Student>> iteratorStudent = students.getTimeToBornTree().entrySet().iterator();
+            while(iteratorStudent.hasNext()){
+                Map.Entry<Double, Student> entry = iteratorStudent.next();
+                double studentBorn = entry.getKey();
+                Student studentLife = entry.getValue();
+                if((((double) time / 1000) - studentBorn) >= studentLife.timeToDie){
+                    iteratorStudent.remove();
+                    students.clearObject(studentLife);
+                    System.out.println(students.getTimeToBornTree());
+                }
+            }
+
         });
         int update_male = 1000;
         timerMale = new Timer(update_male, e -> {
@@ -387,12 +443,12 @@ public class Habitat{
 
     private void updateMale(){
         if (Math.random() < maleProbability) {
-            students.addObj(new MaleStudent(random.nextInt(width), random.nextInt(height)));
+            students.addObj(new MaleStudent(random.nextInt(width), random.nextInt(height), time/1000, setTimeToDieFirst));
         }
     }
     private void updateFemale(){
         if (Math.random() < femaleProbability) {
-            students.addObj(new FemaleStudent(random.nextInt(width), random.nextInt(height)));
+            students.addObj(new FemaleStudent(random.nextInt(width), random.nextInt(height), time/1000, setTimeToDieSecond));
         }
     }
 

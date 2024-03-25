@@ -1,8 +1,9 @@
-
 import java.awt.*;
 public class FemaleStudent extends Student {
-    public FemaleStudent(int x, int y) {
-        super(x, y);
+
+
+    public FemaleStudent(int x, int y, int timeToBorn, int timeToDie) {
+        super(x, y, timeToBorn, timeToDie);
     }
 
     @Override
@@ -15,12 +16,8 @@ public class FemaleStudent extends Student {
     public void move() {
 
     }
-
     @Override
-    public String toString() {
-        return "FemaleStudent{" +
-                "x=" + x +
-                ", y=" + y +
-                '}';
+    public int hashCode() {
+        return super.hashCode();
     }
 }

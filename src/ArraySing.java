@@ -1,14 +1,17 @@
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 public class ArraySing implements Iterable<Student> {
 
     private static ArraySing instance = null;
 
-    private ArrayList<Student> arrayList;
+    private LinkedList<Student> linkedList;
+    private HashSet<Integer> indexHash;
+    private TreeMap<Double, Student> timeToBornTree;
 
     private ArraySing(){
-        arrayList = new ArrayList<>();
+        linkedList = new LinkedList<>();
+        indexHash = new HashSet<>();
+        timeToBornTree = new TreeMap<>();
     }
 
     public static ArraySing getInstance(){
@@ -19,20 +22,36 @@ public class ArraySing implements Iterable<Student> {
     }
 
     public void addObj(Student student){
-        arrayList.add(student);
+        linkedList.add(student);
+        indexHash.add(student.hashCode());
+        timeToBornTree.put(student.timeToBorn, student);
     }
 
-    public ArrayList<Student> getArrayList(){
-        return arrayList;
+    public LinkedList<Student> getLinkedList(){
+        return linkedList;
     }
 
+    public HashSet<Integer> getIndexHash() {
+        return indexHash;
+    }
+
+    public TreeMap<Double, Student> getTimeToBornTree() {
+        return timeToBornTree;
+    }
 
     @Override
     public Iterator<Student> iterator() {
-        return arrayList.iterator();
+        return linkedList.iterator();
     }
 
     public void clear(){
-        arrayList.clear();
+        linkedList.clear();
+        indexHash.clear();
+        timeToBornTree.clear();
+    }
+    public void clearObject(Student student){
+        linkedList.remove(student);
+        indexHash.remove(student.hashCode());
+        timeToBornTree.remove(student.timeToBorn,student);
     }
 }
