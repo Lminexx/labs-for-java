@@ -6,8 +6,6 @@ public class Habitat{
     private int width;
     private int height;
     private final int UPDATE_INTERVAL = 1000;
-
-    private int update_male = 1000;
     private int update_female= 1000;
     private int time;
     private Timer timer;
@@ -19,11 +17,10 @@ public class Habitat{
     private JLabel countStudentsText;
     private JLabel countFemaleStudents;
     private boolean timeLabel = true;
-    private boolean countLabelMale = false;
-    private boolean countLabelFemale = false;
-    private ArraySing students;
+
+    private final ArraySing students;
     private Random random;
-    private boolean simulationRunning =false;
+    private boolean simulationRunning = false;
     private JButton buttonStart;
     private JButton buttonStop;
     private boolean flagForInfo = false;
@@ -31,6 +28,7 @@ public class Habitat{
     private JRadioButton hideTime;
     private double maleProbability = 0.6;
     private double femaleProbability = 0.4;
+    private JCheckBox checkInfo;
 
     public Habitat(int width, int height) {
         this.width = width;
@@ -40,12 +38,25 @@ public class Habitat{
         initialize();
     }
     private void initialize() {
+        initializeFrame();
+        initializePanel();
+        simulationMenu();
+        controlPanel();
+        keyBoardClick();
+        frame.setVisible(true);
+    }
+
+    private void initializeFrame(){
         frame = new JFrame();
         frame.setTitle("laboratornaya");
         frame.setSize(width, height);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setFocusable(true);
         frame.requestFocusInWindow();
+        frame.setLayout(new BorderLayout());
+    }
+
+    private void initializePanel(){
         panel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -69,9 +80,70 @@ public class Habitat{
         panel.add(countFemaleStudents);
         frame.add(panel, BorderLayout.CENTER);
         panel.requestFocusInWindow();
-        controlPanel();
-        keyBoardClick();
-        frame.setVisible(true);
+    }
+
+    private void startButtonMethod(){
+        startSimulation();
+        buttonStart.setBackground(Color.GRAY);
+        buttonStop.setBackground(Color.BLACK);
+        simulationRunning = !simulationRunning;
+    }
+    private void stopButtonMethod(){
+        stopSimulation();
+        buttonStart.setBackground(Color.BLACK);
+        buttonStop.setBackground(Color.GRAY);
+        simulationRunning = !simulationRunning;
+    }
+
+    public void simulationMenu(){
+        JMenuBar jMenuBar = new JMenuBar();
+        JMenu simulation = new JMenu("File");
+        JPanel simalationPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        simalationPanel.setPreferredSize(new Dimension(200,20));
+        JMenuItem start = new JMenuItem("Start");
+        JMenuItem stop = new JMenuItem("Stop");
+        JMenuItem show_info = new JMenuItem("Show info");
+        JMenuItem exit = new JMenuItem("Exit");
+        JMenuItem show_time = new JMenuItem("Show Time");
+        JMenuItem hide_item = new JMenuItem("Hide Item");
+        simulation.add(start);
+        simulation.add(stop);
+        simulation.add(show_info);
+        simulation.add(exit);
+        simulation.add(show_time);
+        simulation.add(hide_item);
+        jMenuBar.add(simulation);
+        //Работа кнопки старт.
+        start.addActionListener(e -> {
+            if(!simulationRunning){
+                startButtonMethod();
+            }
+        });
+        stop.addActionListener(e -> {
+            if(simulationRunning){
+                stopButtonMethod();
+            }
+        });
+        show_info.addActionListener(e -> {
+            flagForInfo = true;
+            checkInfo.setSelected(true);
+        });
+        exit.addActionListener(e -> System.exit(0));
+
+        show_time.addActionListener(e -> {
+            timeLabel = true;
+            label.setVisible(true);
+            showTime.setSelected(true);
+        });
+        hide_item.addActionListener(e -> {
+            timeLabel = false;
+            label.setVisible(false);
+            hideTime.setSelected(true);
+        });
+
+        simulation.setFocusable(false);
+        simulation.setPreferredSize(new Dimension(150,17));
+        frame.setJMenuBar(jMenuBar);
     }
 
     public void controlPanel(){
@@ -88,7 +160,7 @@ public class Habitat{
         //Создание объектов для контрольной панельки.
         buttonStart = new JButton("Start");
         buttonStop = new JButton("Stop");
-        JCheckBox checkInfo = new JCheckBox("Show info");
+        checkInfo = new JCheckBox("Show info");
         showTime = new JRadioButton("Showing time");
         hideTime = new JRadioButton("Hiding time");
         ButtonGroup groupRadio = new ButtonGroup();
@@ -103,8 +175,6 @@ public class Habitat{
         JLabel textB = new JLabel("B - start simulation");
         JLabel textE = new JLabel("E - stop simulation");
         JLabel textT = new JLabel("T - time on/off");
-        JComboBox<String> simulation = new JComboBox<>();
-        JComboBox<String> timerSim = new JComboBox<>();
 
 
         //В выборку добавляю значения шанса
@@ -117,171 +187,91 @@ public class Habitat{
         groupRadio.add(showTime);
         groupRadio.add(hideTime);
         showTime.setSelected(true);
-        simulation.addItem("Simulation");
-        simulation.addItem("Start");
-        simulation.addItem("Stop");
-        simulation.addItem("Show info");
-        simulation.addItem("Exit");
-        timerSim.addItem("Timer");
-        timerSim.addItem("Show Time");
-        timerSim.addItem("Hide Time");
 
 
         //Установил пустой цвет клика. Так симпатичнее имхо.
         buttonStart.setUI(new CustomButtonUI());
         buttonStop.setUI(new CustomButtonUI());
         //Нажатие кнопок, что делают и т.д.
-        buttonStart.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(!simulationRunning){
-                    startSimulation();
-                    buttonStart.setBackground(Color.GRAY);
-                    buttonStop.setBackground(Color.BLACK);
-                    simulationRunning = !simulationRunning;
-                }
+        buttonStart.addActionListener(e -> {
+            if(!simulationRunning){
+                startSimulation();
+                buttonStart.setBackground(Color.GRAY);
+                buttonStop.setBackground(Color.BLACK);
+                simulationRunning = !simulationRunning;
             }
         });
 
-        buttonStop.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(simulationRunning){
-                    stopSimulation();
-                    buttonStart.setBackground(Color.BLACK);
-                    buttonStop.setBackground(Color.GRAY);
-                    simulationRunning = !simulationRunning;
-                }
+        buttonStop.addActionListener(e -> {
+            if(simulationRunning){
+                stopSimulation();
+                buttonStart.setBackground(Color.BLACK);
+                buttonStop.setBackground(Color.GRAY);
+                simulationRunning = !simulationRunning;
             }
         });
 
-        checkInfo.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() == ItemEvent.SELECTED){
-                    flagForInfo = true;
-                }else{
-                    flagForInfo = false;
-                }
+        checkInfo.addItemListener(e -> {
+            if(e.getStateChange() == ItemEvent.SELECTED){
+                flagForInfo = true;
+            }else{
+                flagForInfo = false;
             }
         });
 
-        showTime.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() == ItemEvent.SELECTED){
-                    timeLabel = true;
-                    label.setVisible(timeLabel);
-                }
+        showTime.addItemListener(e -> {
+            if(e.getStateChange() == ItemEvent.SELECTED){
+                timeLabel = true;
+                label.setVisible(true);
             }
         });
 
-        hideTime.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() == ItemEvent.SELECTED){
-                    timeLabel = false;
-                    label.setVisible(timeLabel);
-                }
+        hideTime.addItemListener(e -> {
+            if(e.getStateChange() == ItemEvent.SELECTED){
+                timeLabel = false;
+                label.setVisible(false);
             }
         });
 
-        firstVib.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int selected = (int) firstVib.getSelectedItem();
-                maleProbability = selected/100.0;
-            }
+        firstVib.addActionListener(e -> {
+            int selected = (int) firstVib.getSelectedItem();
+            maleProbability = selected/100.0;
         });
-        secondVib.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int selected = (int) secondVib.getSelectedItem();
-                femaleProbability = selected/100.0;
+        secondVib.addActionListener(e -> {
+            int selected = (int) secondVib.getSelectedItem();
+            femaleProbability = selected/100.0;
+        });
+
+
+        inputTextFirst.addActionListener(e -> {
+            try {
+                int newValue = Integer.parseInt(inputTextFirst.getText());
+                if (newValue >= 0) {
+                    timerMale.setDelay(newValue * 1000);
+                    panel.requestFocusInWindow();
+                    panel.setFocusable(true);
+                    frame.setFocusable(true);
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Введите положительное значение", "Ошибка", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(frame, "Введите допустимое число", "Ошибка", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        simulation.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String selected = (String) simulation.getSelectedItem();
-                if(selected.equals("Start")){
-                    if(!simulationRunning){
-                        startSimulation();
-                        buttonStart.setBackground(Color.GRAY);
-                        buttonStop.setBackground(Color.BLACK);
-                        simulationRunning = !simulationRunning;
-                    }
+        inputTextSecond.addActionListener(e -> {
+            try {
+                int newValue = Integer.parseInt(inputTextSecond.getText());
+                if (newValue >= 0) {
+                    timerFemale.setDelay(newValue * 1000);
+                    panel.requestFocusInWindow();
+                    panel.setFocusable(true);
+                    frame.setFocusable(true);
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Введите положительное значение", "Ошибка", JOptionPane.ERROR_MESSAGE);
                 }
-                if(selected.equals("Stop")){
-                    if(simulationRunning){
-                        stopSimulation();
-                        buttonStart.setBackground(Color.BLACK);
-                        buttonStop.setBackground(Color.GRAY);
-                        simulationRunning = !simulationRunning;
-                    }
-                }
-                if(selected.equals("Show info")){
-                    flagForInfo = true;
-                    checkInfo.setSelected(true);
-                }
-                if(selected.equals("Exit")){
-                    System.exit(0);
-                }
-            }
-        });
-        timerSim.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String selected = (String) timerSim.getSelectedItem();
-                if(selected.equals("Show Time")){
-                    timeLabel = true;
-                    label.setVisible(true);
-                    showTime.setSelected(true);
-                }
-                if(selected.equals("Hide Time")){
-                    timeLabel = false;
-                    label.setVisible(false);
-                    hideTime.setSelected(true);
-                }
-            }
-        });
-
-        inputTextFirst.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    int newValue = Integer.parseInt(inputTextFirst.getText());
-                    if (newValue >= 0) {
-                        timerMale.setDelay(newValue * 1000);
-                        panel.requestFocusInWindow();
-                        panel.setFocusable(true);
-                        frame.setFocusable(true);
-                    } else {
-                        JOptionPane.showMessageDialog(frame, "Введите положительное значение", "Ошибка", JOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(frame, "Введите допустимое число", "Ошибка", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
-        inputTextSecond.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    int newValue = Integer.parseInt(inputTextSecond.getText());
-                    if (newValue >= 0) {
-                        timerFemale.setDelay(newValue * 1000);
-                        panel.requestFocusInWindow();
-                        panel.setFocusable(true);
-                        frame.setFocusable(true);
-                    } else {
-                        JOptionPane.showMessageDialog(frame, "Введите положительное значение", "Ошибка", JOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(frame, "Введите допустимое число", "Ошибка", JOptionPane.ERROR_MESSAGE);
-                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(frame, "Введите допустимое число", "Ошибка", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -293,8 +283,6 @@ public class Habitat{
         hideTime.setFocusable(false);
         firstVib.setFocusable(false);
         secondVib.setFocusable(false);
-        simulation.setFocusable(false);
-        timerSim.setFocusable(false);
         //Установка размеров
         buttonStart.setPreferredSize(new Dimension(200,50));
         buttonStop.setPreferredSize(new Dimension(200,50));
@@ -305,8 +293,6 @@ public class Habitat{
         inputTextFirst.setPreferredSize(new Dimension(190,40));
         secondVib.setPreferredSize(new Dimension(190,40));
         inputTextSecond.setPreferredSize(new Dimension(190,40));
-        simulation.setPreferredSize(new Dimension(190,40));
-        timerSim.setPreferredSize(new Dimension(190,40));
         //Установил задний фон и цвет текста. Получилось красиво :).
         buttonStart.setBackground(Color.BLACK);
         buttonStop.setBackground(Color.BLACK);
@@ -321,6 +307,7 @@ public class Habitat{
         textB.setFont(new Font("Arial",Font.BOLD, 14));
         textE.setFont(new Font("Arial",Font.BOLD, 14));
         textT.setFont(new Font("Arial",Font.BOLD, 14));
+
 
 
         controlpanel.add(buttonStart);
@@ -339,42 +326,31 @@ public class Habitat{
         controlpanel.add(textB);
         controlpanel.add(textE);
         controlpanel.add(textT);
-        controlpanel.add(simulation);
-        controlpanel.add(timerSim);
         frame.add(controlpanel, BorderLayout.EAST);
     }
 
+
     public void startSimulation() {
         students.clear();
-        timer = new Timer(1000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                time+=UPDATE_INTERVAL;
-                label.setText(String.format("Time %d seconds",time/1000));
-                System.out.println(time/1000 + " seconds");
-            }
+        timer = new Timer(1000, e -> {
+            time+=UPDATE_INTERVAL;
+            label.setText(String.format("Time %d seconds",time/1000));
+            System.out.println(time/1000 + " seconds");
         });
-        timerMale = new Timer(update_male, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateMale();
-                panel.repaint();
-            }
+        int update_male = 1000;
+        timerMale = new Timer(update_male, e -> {
+            updateMale();
+            panel.repaint();
         });
-        timerFemale = new Timer(update_female, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateFemale();
-                panel.repaint();
-            }
+        timerFemale = new Timer(update_female, e -> {
+            updateFemale();
+            panel.repaint();
         });
         timer.start();
         timerMale.start();
         timerFemale.start();
-        countLabelMale = false;
-        countLabelFemale = false;
-        countStudentsText.setVisible(countLabelMale);
-        countFemaleStudents.setVisible(countLabelFemale);
+        countStudentsText.setVisible(false);
+        countFemaleStudents.setVisible(false);
     }
     public void stopSimulation() {
         int cntMale = 0;
@@ -393,17 +369,22 @@ public class Habitat{
         timerFemale.stop();
         countStudentsText.setText("Количество студентов = " + cntMale);
         countFemaleStudents.setText("Количество студенток = " + cntFemale);
-        countLabelMale = true;
-        countLabelFemale = true;
-        countStudentsText.setVisible(countLabelMale);
-        countFemaleStudents.setVisible(countLabelFemale);
+
+        countStudentsText.setVisible(true);
+        countFemaleStudents.setVisible(true);
         if(flagForInfo){
-            JOptionPane.showMessageDialog(frame, "Количество студентов = " + cntMale + "\n" + "Количество студенток = " + cntFemale + "\n" + "Время выполнения: " + time/1000 + " секунд", "Информация", JOptionPane.INFORMATION_MESSAGE);
+            String message = "Количество студентов = " + cntMale + "\n" +
+                    "Количество студенток = " + cntFemale + "\n" +
+                    "Время выполнения: " + time/1000 + " секунд";
+            JOptionPane.showOptionDialog(frame, message, "Хотите завершить работу?",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE,
+                    null, new String[]{"Ок", "Отмена"}, "Ок");
 
         }
         time = 0;
-
     }
+
     private void updateMale(){
         if (Math.random() < maleProbability) {
             students.addObj(new MaleStudent(random.nextInt(width), random.nextInt(height)));
@@ -416,39 +397,28 @@ public class Habitat{
     }
 
     private void keyBoardClick(){
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
-            @Override
-            public boolean dispatchKeyEvent(KeyEvent e) {
-                if (e.getID() == KeyEvent.KEY_PRESSED) {
-                    if (!simulationRunning) {
-                        if (e.getKeyCode() == KeyEvent.VK_B) {
-                            startSimulation();
-                            buttonStart.setBackground(Color.GRAY);
-                            buttonStop.setBackground(Color.BLACK);
-                            simulationRunning = true;
-                        }
-                    } else {
-                        if (e.getKeyCode() == KeyEvent.VK_E) {
-                            stopSimulation();
-                            buttonStart.setBackground(Color.BLACK);
-                            buttonStop.setBackground(Color.GRAY);
-                            simulationRunning = false;
-                        }
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
+            if (e.getID() == KeyEvent.KEY_PRESSED) {
+                if (!simulationRunning) {
+                    if (e.getKeyCode() == KeyEvent.VK_B) {
+                        startButtonMethod();
                     }
-                    if (e.getKeyCode() == KeyEvent.VK_T) {
-                        timeLabel = !timeLabel;
-                        label.setVisible(timeLabel);
-                        if (showTime.isSelected()) {
-                            hideTime.setSelected(true);
-                        } else if (hideTime.isSelected()) {
-                            showTime.setSelected(true);
-                        }
+                } else {
+                    if (e.getKeyCode() == KeyEvent.VK_E) {
+                        stopButtonMethod();
                     }
                 }
-                return false;
+                if (e.getKeyCode() == KeyEvent.VK_T) {
+                    timeLabel = !timeLabel;
+                    label.setVisible(timeLabel);
+                    if (showTime.isSelected()) {
+                        hideTime.setSelected(true);
+                    } else if (hideTime.isSelected()) {
+                        showTime.setSelected(true);
+                    }
+                }
             }
+            return false;
         });
     }
-
-
 }
